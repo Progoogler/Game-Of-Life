@@ -1,29 +1,52 @@
 import React, { Component } from 'react';
 import './Grid.css';
 
+import Title from '../components/title/Title';
+import Controls from '../components/controls/Controls';
+import SpeedSettings from '../components/speedSettings/SpeedSettings';
+
 class Grid extends Component {
   constructor() {
     super();
     this.state = {
       visualGrd: [],
-      generation: 0,
+      generations: 0,
       living: true,
+      rate: 100,
     }
+    this._pulse = undefined;
     this.grid = [];
     this.aux = {};
     this.aliveCells = {};
+    this.fast = 100;
+    this.medium = 400;
+    this.slow = 800;
     this.resurrection = this.resurrection.bind(this);
     this.simulateLife = this.simulateLife.bind(this);
+    this.annihilate = this.annihilate.bind(this);
+    this.play = this.play.bind(this);
+    this.stopTime = this.stopTime.bind(this);
+    this.armageddon = this.armageddon.bind(this);
+    this.setRate = this.setRate.bind(this);
   }
 
   render() {
     return (
-      <div className="Grid">
+      <div className="Background">
+        <Title/>
+        <div className="Control-Row">
+          <Controls play={this.play} pause={this.stopTime} clear={this.armageddon}/>
+          <div className="Generations">Generations: {this.state.generations}</div>
+        </div>
 
-        { this.state.visualGrid }
+        <div className="Grid-Settings-Container">
+          <SpeedSettings rateSetting={this.setRate}/>
+          <div className="Grid">
 
-        <div className="Button" onClick={() => this.simulateLife()}>Start</div>
+            { this.state.visualGrid }
 
+          </div>
+        </div>
       </div>
     );
   }
@@ -40,30 +63,27 @@ class Grid extends Component {
       visualGrid.push([]);
       visualGrid[i].push(<div className="Row"/>);
       for (let j = 1; j <= 70; j++) {
-        visualGrid[i].push(<div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(i,j,'now')}/>);
+        visualGrid[i].push(<div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : this.aliveCells[i + ',' + j] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(i,j,'now')}/>);
       }
     }
     this.setState({visualGrid});
-    setTimeout(this.simulateLife.bind(this), 1000);
   }
 
   resurrection(i, j, now) {
-    //this.grid[i][j] = this.grid[i][j] === 0 ? 1 : 0;
-    if (now) { console.log('bring to life', i + '' + j)
+    if (now) {
       this.grid[i][j] = this.grid[i][j] === 0 ? 1 : 0;
       if (this.grid[i][j]) {
-        this.aliveCells[i + ',' + j] = true;
+        this.aliveCells[i + ',' + j] = 1;
       } else {
         delete this.aliveCells[i + ',' + j];
       }
       let visualGrid = this.state.visualGrid;
-      visualGrid[i][j] = <div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(i,j,'now')}/>
-      this.setState({visualGrid, generation: this.state.generation + 1});
+      visualGrid[i][j] = <div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : this.aliveCells[i + ',' + j] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(i,j,'now')}/>
+      this.setState({visualGrid});
     } else if (this.grid[i][j] === 0) {
       this.aux[i + ',' + j] = 1;
-    } else if (this.grid[i][j] === 1) { console.log('delete', i + '' + j)
+    } else {
       this.aux[i + ',' + j] = 0;
-      //delete this.aliveCells[i + ',' + j];
     }
   }
 
@@ -102,14 +122,12 @@ class Grid extends Component {
     if (this.grid[bot][left] === 1) neighbors++;
     if (this.grid[bot][j] === 1) neighbors++;
     if (this.grid[bot][right] === 1) neighbors++;
-
-    console.log(i + '' + j, neighbors, this.grid[bot][left], this.grid[bot][right])
     if (this.aux[i + ',' + j] === undefined) {
       living ? this.survival(i, j, neighbors) : this.reincarnate(i, j, neighbors);
     }
   }
 
-  checkNonLivingNeighbors(i, j, count) { console.log('check non living neighbors of', i+''+j)
+  checkNonLivingNeighbors(i, j, count) {
     var top, bot, left, right;
     if (i === 0) {
       top = this.grid.length - 1;
@@ -158,36 +176,41 @@ class Grid extends Component {
     }
   }
 
-  simulateLife() { console.log('alive cells', this.aliveCells);
-    this.reborn().then(this.annihilate());
+  restart() {
+    this._pulse = setTimeout(this.simulateLife, this.state.rate);
+  }
+
+  play() {
+    if (this.state.living) {
+      this.simulateLife();
+    } else {
+      this.setState({living: true});
+      this.simulateLife();
+    }
+  }
+
+  simulateLife() {
+    this.reborn()
+    .then(this.annihilate)
+    .then(() => {
+      if (this.state.living) {
+        this.restart();
+      }
+    });
   }
 
   reborn() {
+    // Potentially unnecessary to resolve w/ Promise now that this.aux only configures this.grid after both rounds.
     return new Promise((resolve, reject) => {
       var length = Object.keys(this.aliveCells).length;
       var i = 0;
       for (let cell in this.aliveCells) {
-        // check non-living cell neighbors
+        if (this.aliveCells[cell] === 1) this.aliveCells[cell]++; // Cell ages
+        // Check non-living cell neighbors
         let ref = cell.split(',');
         i = this.checkNonLivingNeighbors(parseInt(ref[0], 10), parseInt(ref[1], 10), i);
       }
       if (i === length) {
-        // if (Object.keys(this.aux).length) { console.log('after reborn', this.aux)
-        //   var visualGrid = this.state.visualGrid;
-        //   for (let cell in this.aux) {
-        //     let ref = cell.split(',');
-        //     if (this.aux[cell] === 1) {
-        //       this.aliveCells[cell] = true;
-        //       this.grid[ref[0]][ref[1]] = 1;
-        //     } else {
-        //       delete this.aliveCells[cell];
-        //       this.grid[ref[0]][ref[1]] = 0;
-        //     }
-        //     visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
-        //   }
-        //   this.aux = {};
-        //   this.setState({visualGrid, generation: this.state.generation + 1});
-        // }
         resolve();
       } else {
         reject();
@@ -195,27 +218,77 @@ class Grid extends Component {
     });
   }
 
-
   annihilate() {
-    for (let cell in this.aliveCells) {
-      let ref = cell.split(',');
-      this.checkNeighbors(parseInt(ref[0], 10), parseInt(ref[1], 10), 'living');
-    }
-    if (Object.keys(this.aux).length) { console.log('after reborn', this.aux)
+    return new Promise((resolve, reject) => {
       var visualGrid = this.state.visualGrid;
-      for (let cell in this.aux) {
+      for (let cell in this.aliveCells) {
         let ref = cell.split(',');
-        if (this.aux[cell] === 1) {
-          this.aliveCells[cell] = true;
-          this.grid[ref[0]][ref[1]] = 1;
-        } else {
-          delete this.aliveCells[cell];
-          this.grid[ref[0]][ref[1]] = 0;
-        }
-        visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
+        this.checkNeighbors(parseInt(ref[0], 10), parseInt(ref[1], 10), 'living');
+        visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : this.aliveCells[ref[0] + ',' + ref[1]] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
       }
-      this.aux = {};
-      this.setState({visualGrid, generation: this.state.generation + 1});
+      if (Object.keys(this.aux).length) {
+        for (let cell in this.aux) {
+          let ref = cell.split(',');
+          if (this.aux[cell] === 1) {
+            this.aliveCells[cell] = 1;
+            this.grid[ref[0]][ref[1]] = 1;
+          } else {
+            delete this.aliveCells[cell];
+            this.grid[ref[0]][ref[1]] = 0;
+          }
+          visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : this.aliveCells[ref[0] + ',' + ref[1]] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
+        }
+        this.aux = {};
+      }
+      if (Object.keys(this.aux).length === 0) {
+        this.setState({visualGrid, generations: this.state.generations + 1});
+        resolve();
+      } else {
+        reject();
+      }
+    });
+  }
+
+  stopTime() {
+    this.setState({living: false});
+    clearTimeout(this._pulse);
+  }
+
+  armageddon() {
+    clearTimeout(this._pulse);
+    var visualGrid = [];
+    this.grid = [];
+    this.aux = {};
+    this.aliveCells = {};
+    for (let i = 0; i < 50; i++) {
+      this.grid.push([]);
+      for (let j = 0; j <= 70; j++) {
+        this.grid[i].push(0);
+      }
+    }
+    for (let i = 0; i < 50; i++) {
+      visualGrid.push([]);
+      visualGrid[i].push(<div className="Row"/>);
+      for (let j = 1; j <= 70; j++) {
+        visualGrid[i].push(<div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : this.aliveCells[i + ',' + j] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(i,j,'now')}/>);
+      }
+    }
+    this.setState({visualGrid, living: false, generations: 0});
+  }
+
+  setRate(rate) {
+    switch (rate) {
+      case 'fast':
+        this.setState({rate: this.fast});
+        break;
+      case 'medium':
+        this.setState({rate: this.medium});
+        break;
+      case 'slow':
+        this.setState({rate: this.slow});
+        break;
+      default:
+        return;
     }
   }
 
