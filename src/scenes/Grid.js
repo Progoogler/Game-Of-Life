@@ -56,7 +56,7 @@ class Grid extends Component {
       } else {
         delete this.aliveCells[i + ',' + j];
       }
-      var visualGrid = this.state.visualGrid;
+      let visualGrid = this.state.visualGrid;
       visualGrid[i][j] = <div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(i,j,'now')}/>
       this.setState({visualGrid, generation: this.state.generation + 1});
     } else if (this.grid[i][j] === 0) {
@@ -94,14 +94,14 @@ class Grid extends Component {
       }
     }
 
-    if (this.grid[top][left] === 1 && this.aux[top + ',' + left] === undefined) neighbors++;
-    if (this.grid[top][j] === 1 && this.aux[top + ',' + j] === undefined) neighbors++;
-    if (this.grid[top][right] === 1 && this.aux[top + ',' + right] === undefined) neighbors++;
-    if (this.grid[i][left] === 1 && this.aux[i + ',' + left] === undefined) neighbors++;
-    if (this.grid[i][right] === 1 && this.aux[i + ',' + right] === undefined) neighbors++;
-    if (this.grid[bot][left] === 1 && this.aux[bot + ',' + left] === undefined) neighbors++;
-    if (this.grid[bot][j] === 1 && this.aux[bot + ',' + j] === undefined) neighbors++;
-    if (this.grid[bot][right] === 1 && this.aux[bot + ',' + right] === undefined) neighbors++;
+    if (this.grid[top][left] === 1) neighbors++;
+    if (this.grid[top][j] === 1) neighbors++;
+    if (this.grid[top][right] === 1) neighbors++;
+    if (this.grid[i][left] === 1) neighbors++;
+    if (this.grid[i][right] === 1) neighbors++;
+    if (this.grid[bot][left] === 1) neighbors++;
+    if (this.grid[bot][j] === 1) neighbors++;
+    if (this.grid[bot][right] === 1) neighbors++;
 
     console.log(i + '' + j, neighbors, this.grid[bot][left], this.grid[bot][right])
     if (this.aux[i + ',' + j] === undefined) {
@@ -135,14 +135,14 @@ class Grid extends Component {
       }
     }
 
-    if (this.grid[top][left] === 0 && this.aux[top + ',' + left] === undefined) this.checkNeighbors(top, left);
-    if (this.grid[top][j] === 0 && this.aux[top + ',' + j] === undefined) this.checkNeighbors(top, j);
-    if (this.grid[top][right] === 0 && this.aux[top + ',' + right] === undefined) this.checkNeighbors(top, right);
-    if (this.grid[i][left] === 0 && this.aux[i + ',' + left] === undefined) this.checkNeighbors(i, left);
-    if (this.grid[i][right] === 0 && this.aux[i + ',' + right] === undefined) this.checkNeighbors(i, right);
-    if (this.grid[bot][left] === 0 && this.aux[bot + ',' + left] === undefined) this.checkNeighbors(bot, left);
-    if (this.grid[bot][j] === 0 && this.aux[bot + ',' + j] === undefined) this.checkNeighbors(bot, j);
-    if (this.grid[bot][right] === 0 && this.aux[bot + ',' + right] === undefined) this.checkNeighbors(bot, right);
+    if (this.grid[top][left] === 0) this.checkNeighbors(top, left);
+    if (this.grid[top][j] === 0) this.checkNeighbors(top, j);
+    if (this.grid[top][right] === 0) this.checkNeighbors(top, right);
+    if (this.grid[i][left] === 0) this.checkNeighbors(i, left);
+    if (this.grid[i][right] === 0) this.checkNeighbors(i, right);
+    if (this.grid[bot][left] === 0) this.checkNeighbors(bot, left);
+    if (this.grid[bot][j] === 0) this.checkNeighbors(bot, j);
+    if (this.grid[bot][right] === 0) this.checkNeighbors(bot, right);
     return count + 1;
   }
 
@@ -172,22 +172,22 @@ class Grid extends Component {
         i = this.checkNonLivingNeighbors(parseInt(ref[0], 10), parseInt(ref[1], 10), i);
       }
       if (i === length) {
-        if (Object.keys(this.aux).length) { console.log('after reborn', this.aux)
-          var visualGrid = this.state.visualGrid;
-          for (let cell in this.aux) {
-            let ref = cell.split(',');
-            if (this.aux[cell] === 1) {
-              this.aliveCells[cell] = true;
-              this.grid[ref[0]][ref[1]] = 1;
-            } else {
-              delete this.aliveCells[cell];
-              this.grid[ref[0]][ref[1]] = 0;
-            }
-            visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
-          }
-          this.aux = {};
-          this.setState({visualGrid, generation: this.state.generation + 1});
-        }
+        // if (Object.keys(this.aux).length) { console.log('after reborn', this.aux)
+        //   var visualGrid = this.state.visualGrid;
+        //   for (let cell in this.aux) {
+        //     let ref = cell.split(',');
+        //     if (this.aux[cell] === 1) {
+        //       this.aliveCells[cell] = true;
+        //       this.grid[ref[0]][ref[1]] = 1;
+        //     } else {
+        //       delete this.aliveCells[cell];
+        //       this.grid[ref[0]][ref[1]] = 0;
+        //     }
+        //     visualGrid[ref[0]][ref[1]] = <div key={cell} className={this.grid[ref[0]][ref[1]] === 0 ? 'Dead' : 'Alive'} onClick={() => this.resurrection(ref[0],ref[1],'now')}/>
+        //   }
+        //   this.aux = {};
+        //   this.setState({visualGrid, generation: this.state.generation + 1});
+        // }
         resolve();
       } else {
         reject();
