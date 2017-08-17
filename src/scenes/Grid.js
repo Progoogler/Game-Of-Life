@@ -57,7 +57,39 @@ class Grid extends Component {
     for (let i = 0; i < this.size.length; i++) {
       this.grid.push([]);
       for (let j = 0; j <= this.size.width; j++) {
-        this.grid[i].push(0);
+        if (i === 20 && j === 35) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 21 && (j === 35 || j === 36 || j === 37 || j === 38)) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 25 && j === 35) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 26 && (j === 35 || j === 36 || j === 37 || j === 38)) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 25 && j === 28) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 26 && (j === 28 || j === 27 || j === 26 || j === 25)) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 25 && j === 44) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 26 && (j === 44 || j === 45 || j === 46 || j === 47)) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 30 && j === 35) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else if (i === 31 && (j === 35 || j === 36 || j === 37 || j === 38)) {
+          this.grid[i].push(1);
+          this.aliveCells[i + ',' + j] = 1;
+        } else {
+          this.grid[i].push(0);
+        }
       }
     }
     for (let i = 0; i < this.size.length; i++) {
@@ -68,6 +100,7 @@ class Grid extends Component {
       }
     }
     this.setState({visualGrid});
+    setTimeout(this.simulateLife, 500);
   }
 
   resurrection(i, j, now) {
