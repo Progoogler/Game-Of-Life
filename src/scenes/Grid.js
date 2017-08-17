@@ -3,7 +3,7 @@ import './Grid.css';
 
 import Title from '../components/title/Title';
 import Controls from '../components/controls/Controls';
-import SpeedSettings from '../components/speedSettings/SpeedSettings';
+import Settings from '../components/settings/Settings';
 
 class Grid extends Component {
   constructor() {
@@ -21,6 +21,7 @@ class Grid extends Component {
     this.fast = 100;
     this.medium = 400;
     this.slow = 800;
+    this.size = {length: 50, width: 70};
     this.resurrection = this.resurrection.bind(this);
     this.simulateLife = this.simulateLife.bind(this);
     this.annihilate = this.annihilate.bind(this);
@@ -40,7 +41,7 @@ class Grid extends Component {
         </div>
 
         <div className="Grid-Settings-Container">
-          <SpeedSettings rateSetting={this.setRate}/>
+          <Settings rateSetting={this.setRate} sizeSetting={this.armageddon}/>
           <div className="Grid">
 
             { this.state.visualGrid }
@@ -53,16 +54,16 @@ class Grid extends Component {
 
   componentWillMount() {
     var visualGrid = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < this.size.length; i++) {
       this.grid.push([]);
-      for (let j = 0; j <= 70; j++) {
+      for (let j = 0; j <= this.size.width; j++) {
         this.grid[i].push(0);
       }
     }
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < this.size.length; i++) {
       visualGrid.push([]);
       visualGrid[i].push(<div className="Row"/>);
-      for (let j = 1; j <= 70; j++) {
+      for (let j = 1; j <= this.size.width; j++) {
         visualGrid[i].push(<div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : this.aliveCells[i + ',' + j] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(i,j,'now')}/>);
       }
     }
@@ -254,22 +255,23 @@ class Grid extends Component {
     clearTimeout(this._pulse);
   }
 
-  armageddon() {
+  armageddon(size) {
+    if (size) this.size = size;
     clearTimeout(this._pulse);
     var visualGrid = [];
     this.grid = [];
     this.aux = {};
     this.aliveCells = {};
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < this.size.length; i++) {
       this.grid.push([]);
-      for (let j = 0; j <= 70; j++) {
+      for (let j = 0; j <= this.size.width; j++) {
         this.grid[i].push(0);
       }
     }
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < this.size.length; i++) {
       visualGrid.push([]);
       visualGrid[i].push(<div className="Row"/>);
-      for (let j = 1; j <= 70; j++) {
+      for (let j = 1; j <= this.size.width; j++) {
         visualGrid[i].push(<div key={i + '' + j} className={this.grid[i][j] === 0 ? 'Dead' : this.aliveCells[i + ',' + j] === 1 ? 'Alive' : 'Old'} onClick={() => this.resurrection(i,j,'now')}/>);
       }
     }
