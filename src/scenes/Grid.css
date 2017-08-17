@@ -1,25 +1,23 @@
 .Background {
-  background-color: black;
-  min-height: 100%;
-  min-width: 1024px;
   width: 100%;
   height: auto;
-  position: fixed;
   top: 0;
   left: 0;
   text-align: center;
 }
 
 .Control-Row {
-  margin: 25px 0;
+  margin: 20px 0;
 }
 
 .Generations {
+  width: 15%;
   margin-left: 35px;
   display: inline-block;
   font-weight: bold;
   font-size: 1.5em;
   color: white;
+  white-space: nowrap;
 }
 
 .Grid-Settings-Container {
